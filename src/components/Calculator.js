@@ -24,6 +24,7 @@ function reducer (state, {type, payload}) {
             if(payload.digit === '0' && state.currentOperand === '0') {
                 return state
             }
+            if(payload.digit === '.' && state.currentOperand == null) {return state}
             if(payload.digit === '.' && state.currentOperand.includes('.')) {
                 return state
             }
@@ -123,6 +124,17 @@ function evaluate({currentOperand, previousOperand, operation}) {
 
 }
 
+const INTERGER_FORMATER = new Intl.NumberFormat("en-us", {
+    maximumFractionDigits: 0
+})
+
+function formatOperand(operand) {
+    if (operand == null) return
+    const [interger, decimal] = operand.split('.')
+    if (decimal == null) return INTERGER_FORMATER.format(interger)
+    return `${INTERGER_FORMATER.format(interger)}.${decimal}`
+}
+
 export default function Calculator () {
 
     const [{currentOperand, previousOperand, operation}, dispatch] = useReducer(reducer, {})
@@ -132,8 +144,8 @@ export default function Calculator () {
     return (
         <div className="calculator-grid">
             <div className="output">
-                <div className="previous-operand">{previousOperand} {operation}</div>
-                <div className="current-operand">{currentOperand}</div>
+                <div className="previous-operand">{formatOperand(previousOperand)} {operation}</div>
+                <div className="current-operand">{formatOperand(currentOperand)}</div>
             </div>
             <button className="span-two" onClick={() => dispatch ({type: ACTIONS.CLEAR })}>AC</button> 
             <button onClick={() => dispatch ({type: ACTIONS.DELETE_DIGIT })}>DEL</button>
@@ -153,6 +165,7 @@ export default function Calculator () {
             <DigitButton digit="." dispatch={dispatch} />
             <DigitButton digit="0" dispatch={dispatch} />
             <button className="span-two" onClick={() => dispatch ({type: ACTIONS.EVALUATE })}>=</button>
+            <br></br>
         </div>
     )
 }
